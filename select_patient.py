@@ -1,7 +1,6 @@
 import pandas as pd
 import random
 
-
 def renumberDid(label):
   '''
   Help for the renumberDid() function. 
@@ -21,7 +20,6 @@ def renumberDid(label):
       label_did_list[num] = did_list_renumbered[index]
    label['DID'] = label_did_list
    return label
-
 
 
 def readData(countfile, labelfile):
@@ -59,12 +57,6 @@ def prepareData(data, labels):
    data.rename(columns={'Unnamed: 0':'CELLID'}, inplace=True)  
    labels.rename(columns={'Unnamed: 0':'CELLID'}, inplace = True)
    return data, labels
-
-
-
-
-
-
 
 def selectPatient(labelsSet,data, option = False,  whatLabels = "STATUS", valueWanted = "normal", balance = True, PrepareData = True):
      '''
