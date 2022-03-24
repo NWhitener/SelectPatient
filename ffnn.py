@@ -1,4 +1,4 @@
-import select_patient as sp 
+import preprocess as prepro 
 import pandas as pd
 from keras.utils import to_categorical
 import numpy as np
