@@ -104,12 +104,11 @@ def selectPatient(labelsSet,data, option = False, whatLabels = "STATUS", valueWa
     labels_patient_men = labels_men_ordered.loc[labels_men_ordered["DID"] == uni_num_men]
     percent_male = len(labels_patient_men)
     percent_women = len(labels_patient_women)
-    print(balance)
     if (not balance):
         if(percent_male != percent_women):
             print("Warning: The number of male samples is ", percent_male, " and the number of female patients is ",
                 percent_women, ". This is a", round((percent_male/(percent_male+percent_women))*100,2), "% male population and a ",
-                round((percent_women/(percent_male+percent_women))*100,2), "% female population. This is an imbalance.\n",
+                round((percent_women/(percent_male+percent_women))*100,2), "%\ Female population. This is an imbalance.\n",
                 "This may effect performance, consider adding the balance parameter")
     elif (balance):
             if percent_women > percent_male:
@@ -120,10 +119,13 @@ def selectPatient(labelsSet,data, option = False, whatLabels = "STATUS", valueWa
                 labels_patient_men = labels_patient_men.sample(n=percent_women)
     data_male = selectData(data, 'CELLID',labels_patient_men['CELLID'].to_list())
     data_female = selectData(data, 'CELLID',labels_patient_women['CELLID'].to_list())
+    labels_women_ordered = labels_women_ordered[labels_women_ordered["DID"]!= uni_num_women]
+    labels_men_ordered = labels_men_ordered[labels_men_ordered["DID"]!=uni_num_men]
+    labels_men = labels_women
     frames = [labels_patient_women,labels_patient_men]
     labels_patients = pd.concat(frames)
     frames2 = [data_female,data_male]
     data_patients = pd.concat(frames2)
-    return labels_patients, data_patients, labels_patient_women, labels_patient_men
+    return labels_patients, data_patients, labels_women_ordered, labels_men_ordered
 
 
