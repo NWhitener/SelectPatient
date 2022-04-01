@@ -1,20 +1,22 @@
 import pandas as pd
-from keras.utils import to_categorical
+from tensorflow.keras.utils import to_categorical
 import numpy as np
 from sklearn.preprocessing import LabelEncoder
-from keras.models import Sequential
-from keras.layers import Activation
-from keras.layers import Dense, Dropout, Conv1D, Flatten, MaxPooling1D
-from keras import optimizers
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Activation
+from tensorflow.keras.layers import Dense, Dropout, Conv1D, Flatten, MaxPooling1D
+from tensorflow.keras import optimizers
 import time
 import sys
-from keras.regularizers import l2
+from tesorflow.keras.regularizers import l2
 from sklearn.model_selection import StratifiedKFold
 import tracemalloc
 from sklearn.metrics.cluster import normalized_mutual_info_score
 from sklearn.metrics import precision_recall_fscore_support, classification_report, confusion_matrix
 from sklearn.metrics import cohen_kappa_score, balanced_accuracy_score, accuracy_score
 from sklearn.metrics import roc_curve,roc_auc_score
+from sklearn.preprocessing import OrdinalEncoder
+
 
 def evaluate_nmi(observed, predicted):
    nmi = normalized_mutual_info_score(observed, predicted)
@@ -48,6 +50,13 @@ def train_ffnn_model(train_x, train_y, test_x, num_labels):
     #(loss, accuracy) = model.evaluate(train_x, train_y, batch_size=128, verbose=1)
     predictions = np.argmax(model.predict(test_x), axis=-1)
     return(predictions)
+
+def encoding(labels): 
+    ord_enc = OrdinalEncoder()
+    # labels['encoding'] = ord_enc.fit_transform(labels[["labels"]])
+    num_labels = len(set(labels['labels']))
+    labels = to_categorical(labels['labels'], num_classes=len(pd.unique(labels['labels'])), dtype='float32')
+    return labels, num_labels
 
 
 def create_labs(labels):

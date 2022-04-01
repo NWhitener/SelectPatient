@@ -127,7 +127,6 @@ def selectPatient(labelsSet,data, option = False, whatLabels = "STATUS", valueWa
     frames2 = [data_female,data_male]
     data_patients = pd.concat(frames2)
     labels_new = pd.concat(frames_full) 
-    num_labels = len(set(labels_patients["labels"]))
-    return labels_patients, data_patients, labels_new, num_labels 
+    return labels_patients, data_patients, labels_new
 
 
