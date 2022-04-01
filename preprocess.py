@@ -121,11 +121,13 @@ def selectPatient(labelsSet,data, option = False, whatLabels = "STATUS", valueWa
     data_female = selectData(data, 'CELLID',labels_patient_women['CELLID'].to_list())
     labels_women_ordered = labels_women_ordered[labels_women_ordered["DID"]!= uni_num_women]
     labels_men_ordered = labels_men_ordered[labels_men_ordered["DID"]!=uni_num_men]
-    labels_men = labels_women
+    frames_full = [labels_women_ordered, labels_men_ordered]
     frames = [labels_patient_women,labels_patient_men]
     labels_patients = pd.concat(frames)
     frames2 = [data_female,data_male]
     data_patients = pd.concat(frames2)
-    return labels_patients, data_patients, labels_women_ordered, labels_men_ordered
+    labels_new = pd.concat(frames_full) 
+    num_labels = len(set(labels_patients["labels"]))
+    return labels_patients, data_patients, labels_new, num_labels 
 
 
