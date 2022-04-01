@@ -38,7 +38,7 @@ def train_ffnn_model(train_x, train_y, test_x, num_labels):
     model.add(Dropout(0.7))
     model.add(Dense(128, activation="relu"))
     model.add(Dense(64, activation="relu"))
-    model.add(Dense(numlabels,activation = "sigmoid"))
+    model.add(Dense(num_labels,activation = "sigmoid"))
 
     model.compile(loss='binary_crossentropy',
               optimizer=optimizers.RMSprop(lr=1e-4),
@@ -71,7 +71,7 @@ def run_ffnn_model(data, labels, num_labels):
     for train, test in kfold.split(data, np.argmax(labels, axis= -1)):
         fold_result = pd.DataFrame()
         fold_result['class'] = np.argmax(labels[test], axis= -1)
-        fold_result['FFNN'] = train_ffnn_model(data[train], labels[train], data[test], numlabels)
+        fold_result['FFNN'] = train_ffnn_model(data[train], labels[train], data[test], num_labels)
         nmi_scores_ffnn.append(evaluate_nmi(fold_result['class'], fold_result['FFNN']))
         auc_scores_ffnn.append(evaluate_roc(fold_result['class'], fold_result['FFNN']))
         kappa_scores_ffnn.append(evaluate_kappa(fold_result['class'], fold_result['FFNN']))
