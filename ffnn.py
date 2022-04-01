@@ -95,8 +95,6 @@ def run_ffnn_model(data, labels, num_labels):
               'FFNN_KAPPA_STD': np.std(kappa_scores_ffnn),
               },
               ignore_index=True)
-
-    print(results)
     results.to_csv('Metrics_3layer_binary_acc_sig.csv')
 
 
