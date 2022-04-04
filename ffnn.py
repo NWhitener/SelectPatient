@@ -11,64 +11,32 @@ import sys
 from tesorflow.keras.regularizers import l2
 from sklearn.model_selection import StratifiedKFold
 import tracemalloc
-from sklearn.metrics.cluster import normalized_mutual_info_score
-from sklearn.metrics import precision_recall_fscore_support, classification_report, confusion_matrix
-from sklearn.metrics import cohen_kappa_score, balanced_accuracy_score, accuracy_score
-from sklearn.metrics import roc_curve,roc_auc_score
-from sklearn.preprocessing import OrdinalEncoder
+import evaluate as ev
 
+#TODO: SETUP method to set up the model 
 
-def evaluate_nmi(observed, predicted):
-   nmi = normalized_mutual_info_score(observed, predicted)
-   return(nmi)
-
-def evaluate_roc(observed, predicted):
-   roc = roc_auc_score(observed, predicted)
-   return(roc)
-
-def evaluate_kappa(observed, predicted):
-   kap = cohen_kappa_score(observed, predicted)
-   return(kap)
-
-def evaluate_f1(observed, predicted):
-   f1 = precision_recall_fscore_support(observed, predicted, average='weighted')
-   return(f1)
-
-def train_ffnn_model(train_x, train_y, test_x, num_labels):
+def create_ffnn_model(train_x, train_y, test_x, num_labels):
     model = Sequential()
     model.add(Dense(256, input_dim=train_x.shape[1], kernel_regularizer=l2(0.01), activation="relu"))
     model.add(Dropout(0.7))
     model.add(Dense(128, activation="relu"))
     model.add(Dense(64, activation="relu"))
     model.add(Dense(num_labels,activation = "sigmoid"))
-
     model.compile(loss='binary_crossentropy',
               optimizer=optimizers.RMSprop(lr=1e-4),
               metrics=['binary_accuracy'])
+    return(model)
 
-    model.fit(train_x, train_y, epochs=50, batch_size=128,verbose=1)
-    #(loss, accuracy) = model.evaluate(train_x, train_y, batch_size=128, verbose=1)
+def train_ffnn(model,train_x, train_y):
+    model.fit(train_x, train_y, epochs = 50, batch_size = 128, verbose =1)
+    (loss, accuracy) = model.evaluate(train_x, train_y, batch_size=128, verbose=1)
+    return(model)
+
+def test_ffnn(model, test_x):
     predictions = np.argmax(model.predict(test_x), axis=-1)
     return(predictions)
 
-def encoding(labels): 
-    ord_enc = OrdinalEncoder()
-    # labels['encoding'] = ord_enc.fit_transform(labels[["labels"]])
-    num_labels = len(set(labels['labels']))
-    labels = to_categorical(labels['labels'], num_classes=len(pd.unique(labels['labels'])), dtype='float32')
-    return labels, num_labels
-
-
-def create_labs(labels):
-
-    #if row["tissue"] == "TUMOR":
-    #if row["sex"] == "M":
-    if labels["SEX"] == "male":
-        val = 0
-    else:
-        val = 1
-    return val
-
+  
 def run_ffnn_model(data, labels, num_labels):
     results = pd.DataFrame(columns=['FFNN_NMI_AVE', 'FFNN_NMI_STD', 'FFNN_ROC_AVE','FFNN_ROC_STD','FFNN_KAPPA_AVE', 'FFNN_KAPPA_STD'])
     fold_number = 1

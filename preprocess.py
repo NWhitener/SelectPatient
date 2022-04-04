@@ -1,5 +1,7 @@
 import pandas as pd
 import random
+from sklearn.preprocessing import OrdinalEncoder
+
 
 def renumberDid(label):
     '''
@@ -56,6 +58,13 @@ def prepareData(data, labels):
     data.rename(columns={'Unnamed: 0':'CELLID'}, inplace=True)  
     labels.rename(columns={'Unnamed: 0':'CELLID'}, inplace = True)
     return data, labels
+
+def encoding(labels): 
+    ord_enc = OrdinalEncoder()
+    # labels['encoding'] = ord_enc.fit_transform(labels[["labels"]])
+    num_labels = len(set(labels['labels']))
+    labels = to_categorical(labels['labels'], num_classes=len(pd.unique(labels['labels'])), dtype='float32')
+    return labels, num_labels
 
 def selectPatient(labelsSet,data, option = False, whatLabels = "STATUS", valueWanted = "normal", balance = True, PrepareData = True):
     '''
