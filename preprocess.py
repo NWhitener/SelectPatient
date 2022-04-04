@@ -1,7 +1,7 @@
 import pandas as pd
 import random
 from sklearn.preprocessing import OrdinalEncoder
-
+import string
 
 def renumberDid(label):
     '''
@@ -14,13 +14,13 @@ def renumberDid(label):
            to the number of unique Patient Donor ID's
   Example: labels_renumbered = renumberDid(labels)
     '''
-    did_list_raw = label['DID'].value_counts().sort_index().index.values.tolist()
+    did_list_raw = label['did'].value_counts().sort_index().index.values.tolist()
     did_list_renumbered = list(range(0,len(did_list_raw)))
-    label_did_list = label['DID'].tolist()
+    label_did_list = label['did'].tolist()
     for num in range(0,len(label_did_list)):
       index = did_list_raw.index(label_did_list[num])
       label_did_list[num] = did_list_renumbered[index]
-    label['DID'] = label_did_list
+    label['did'] = label_did_list
     return label
 
 def readData(countfile, labelfile):
@@ -56,7 +56,7 @@ def prepareData(data, labels):
     Example: data, labels = prepareData(data,labelsSet)
     '''
     data.rename(columns={'Unnamed: 0':'CELLID'}, inplace=True)  
-    labels.rename(columns={'Unnamed: 0':'CELLID'}, inplace = True)
+    labels.rename(columns={'unnamed: 0' : 'CELLID'}, inplace = True)
     return data, labels
 
 def encoding(labels): 
@@ -66,7 +66,7 @@ def encoding(labels):
     labels = to_categorical(labels['labels'], num_classes=len(pd.unique(labels['labels'])), dtype='float32')
     return labels, num_labels
 
-def selectPatient(labelsSet,data, option = False, whatLabels = "STATUS", valueWanted = "normal", balance = True, PrepareData = True):
+def selectPatient(labels,data, option = False, whatLabels = "STATUS", valueWanted = "normal", balance = True, PrepareData = True):
     '''
     Help for the selectPatient() function. 
 
@@ -95,22 +95,23 @@ def selectPatient(labelsSet,data, option = False, whatLabels = "STATUS", valueWa
     Return:  selectPatient() will return a dataset and annotation set that contain 1 male patient, and 1 female patient. 
     Example:labels_patient, data_patient = sp.selectPatient(labels,data,option=True, balance = True, PrepareData = True)
     '''
+    labels.columns = map(str.lower, labels.columns)
     if(PrepareData):
-         data, labels = prepareData(data,labelsSet)
-    labels_men = labels.loc[labels["SEX"] == "male"]
-    labels_women = labels.loc[labels["SEX"] == "female"]
+         data, labels = prepareData(data,labels)
+    labels_men = labels.loc[labels['sex'] == "male"]
+    labels_women = labels.loc[labels['sex'] == "female"]
         #Gives the user the option to input the labels they want from the command line         
     if(option == True):
-        print(labelsSet.columns)
+        print(labels.columns)
         whatLabels, valueWanted = input("Enter the Label you want, then the discriminating value you want \n").split()
     labels_men = labels_men.loc[labels_men[whatLabels] == valueWanted]
     labels_women = labels_women.loc[labels_women[whatLabels] == valueWanted]
     labels_women_ordered = renumberDid(labels_women)
-    uni_num_women = random.randint(0, len(pd.unique(labels_women_ordered["DID"]))-1)
+    uni_num_women = random.randint(0, len(pd.unique(labels_women_ordered["did"]))-1)
     labels_men_ordered = renumberDid(labels_men)
-    uni_num_men = random.randint(0, len(pd.unique(labels_men_ordered["DID"]))-1)
-    labels_patient_women = labels_women_ordered.loc[labels_women_ordered["DID"] == uni_num_women]
-    labels_patient_men = labels_men_ordered.loc[labels_men_ordered["DID"] == uni_num_men]
+    uni_num_men = random.randint(0, len(pd.unique(labels_men_ordered["did"]))-1)
+    labels_patient_women = labels_women_ordered.loc[labels_women_ordered["did"] == uni_num_women]
+    labels_patient_men = labels_men_ordered.loc[labels_men_ordered["did"] == uni_num_men]
     percent_male = len(labels_patient_men)
     percent_women = len(labels_patient_women)
     if (not balance):
@@ -126,10 +127,10 @@ def selectPatient(labelsSet,data, option = False, whatLabels = "STATUS", valueWa
             else:
                 print("Balanced Men")
                 labels_patient_men = labels_patient_men.sample(n=percent_women)
-    data_male = selectData(data, 'CELLID',labels_patient_men['CELLID'].to_list())
-    data_female = selectData(data, 'CELLID',labels_patient_women['CELLID'].to_list())
-    labels_women_ordered = labels_women_ordered[labels_women_ordered["DID"]!= uni_num_women]
-    labels_men_ordered = labels_men_ordered[labels_men_ordered["DID"]!=uni_num_men]
+    data_male = selectData(data, 'CELLID', labels_patient_men['CELLID'].to_list())
+    data_female = selectData(data, 'CELLID', labels_patient_women['CELLID'].to_list())
+    labels_women_ordered = labels_women_ordered[labels_women_ordered["did"]!= uni_num_women]
+    labels_men_ordered = labels_men_ordered[labels_men_ordered["did"]!=uni_num_men]
     frames_full = [labels_women_ordered, labels_men_ordered]
     frames = [labels_patient_women,labels_patient_men]
     labels_patients = pd.concat(frames)
